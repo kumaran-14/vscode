@@ -71,6 +71,13 @@ export class UntitledTextEditorInput extends TextEditorInput implements IEncodin
 	}
 
 	getName(): string {
+		if (this.cachedModel?.isResolved()) {
+			const firstLineText = this.cachedModel.textEditorModel.getValueInRange({ startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: 50 });
+			if (firstLineText) {
+				return firstLineText;
+			}
+		}
+
 		return this.hasAssociatedFilePath ? basenameOrAuthority(this.resource) : this.resource.path;
 	}
 
@@ -281,6 +288,7 @@ export class UntitledTextEditorInput extends TextEditorInput implements IEncodin
 		// re-emit some events from the model
 		this._register(model.onDidChangeDirty(() => this._onDidChangeDirty.fire()));
 		this._register(model.onDidChangeEncoding(() => this._onDidModelChangeEncoding.fire()));
+		this._register(model.onDidChangeContent(() => this._onDidChangeLabel.fire()));
 
 		return model;
 	}
